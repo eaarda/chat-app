@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO
+import logging
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 
 @app.route('/')
@@ -19,5 +22,10 @@ def chat():
         return redirect(url_for('index'))
 
 
+@socketio.on('join_room')
+def handle_join_room_event(data):
+    app.logger.info("{} joined the room {}".format(data['username'], data['room']))
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
