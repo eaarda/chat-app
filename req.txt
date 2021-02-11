@@ -2,3 +2,5 @@ pip install python-engineio==3.13.2
 pip install python-socketio==4.6.1
 
 pip install eventlet
+
+pip install pymongo
