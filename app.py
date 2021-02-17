@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, join_room
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import logging
+from bson.json_util import dumps
 from pymongo.errors import DuplicateKeyError
 
-from db import get_user, save_user
+from db import save_user, get_user, save_room, add_room_members, get_room, get_room_members, get_rooms_for_user, \
+    is_room_member, is_room_admin, update_room, remove_room_members
 
 app = Flask(__name__)
 app.secret_key = 'cokgizli'
@@ -62,6 +63,27 @@ def signup():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route('/create_room/', methods=['GET', 'POST'])
+@login_required
+def create_room():
+    message = ''
+    if request.method == 'POST':
+        room_name = request.form.get('room_name')
+        usernames = [username.strip()
+                     for username in request.form.get('members').split(',')]
+
+        if len(room_name) and len(usernames):
+            room_id = save_room(room_name, current_user.username)
+            if current_user.username in usernames:
+                usernames.remove(current_user.username)
+            add_room_members(room_id, room_name, usernames,
+                             current_user.username)
+        else:
+            message = "Failed to create room"
+
+    return render_template('create_room.html', message=message)
 
 
 @app.route('/chat')
