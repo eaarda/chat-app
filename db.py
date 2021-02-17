@@ -46,30 +46,32 @@ def add_room_members(room_id, room_name, usernames, added_by):
 
 
 def get_room(room_id):
-    rooms_collection.find_one({'_id': ObjectId(room_id)})
+    return rooms_collection.find_one({'_id': ObjectId(room_id)})
 
 
 def get_room_members(room_id):
-    room_members_collection.find({'_id.room_id': ObjectId(room_id)})
+    return list(room_members_collection.find({'_id.room_id': ObjectId(room_id)}))
 
 
 def get_rooms_for_user(username):
-    room_members_collection.find({'_id.username': username})
+    return list(room_members_collection.find({'_id.username': username}))
 
 
 def is_room_member(room_id, username):
-    room_members_collection.count_documents(
-        {'_id': {'room_id': ObjectId(room_id), username: username}})
+    return room_members_collection.count_documents(
+        {'_id': {'room_id': ObjectId(room_id), 'username': username}})
 
 
 def is_room_admin(room_id, username):
-    room_members_collection.count_documents(
-        {'_id': {'room_id': ObjectId(room_id), username: username}, 'is_room_admin': True})
+    return room_members_collection.count_documents(
+        {'_id': {'room_id': ObjectId(room_id), 'username': username}, 'is_room_admin': True})
 
 
 def update_room(room_id, room_name):
     rooms_collection.update_one({'_id': ObjectId(room_id)}, {
                                 '$set': {'name': room_name}})
+    room_members_collection.update_many({'_id.room_id': ObjectId(room_id)}, {
+                                        '$set': {'room_name': room_name}})
 
 
 def remove_room_members(room_id, usernames):
