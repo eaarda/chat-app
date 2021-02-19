@@ -82,4 +82,8 @@ def remove_room_members(room_id, usernames):
 
 def save_messages(room_id, text, sender):
     messages_collection.insert_one(
-        {'room_id': room_id, 'text': text, 'sender': sender})
+        {'room_id': room_id, 'text': text, 'sender': sender, 'created_at': datetime.now()})
+
+
+def get_messages(room_id):
+    return list(messages_collection.find({'room_id': room_id}))

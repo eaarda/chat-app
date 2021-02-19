@@ -5,7 +5,7 @@ from bson.json_util import dumps
 from pymongo.errors import DuplicateKeyError
 
 from db import save_user, get_user, save_room, add_room_members, get_room, get_room_members, get_rooms_for_user, \
-    is_room_member, is_room_admin, update_room, remove_room_members, save_messages
+    is_room_member, is_room_admin, update_room, remove_room_members, save_messages, get_messages
 
 app = Flask(__name__)
 app.secret_key = 'cokgizli'
@@ -96,7 +96,9 @@ def view_room(room_id):
     room = get_room(room_id)
     if room and is_room_member(room_id, current_user.username):
         room_members = get_room_members(room_id)
-        return render_template('view_room.html', username=current_user.username, room=room, room_members=room_members)
+        messages = get_messages(room_id)
+        return render_template('view_room.html', username=current_user.username, room=room,
+                               room_members=room_members, messages=messages)
     else:
         return "Room not found!", 404
 
@@ -136,6 +138,7 @@ def edit_room(room_id):
 def handle_send_message_event(data):
     app.logger.info("{} sent message to the room {}: {}".format(
         data['username'], data['room'], data['message']))
+    save_messages(data['room'], data['message'], data['username'])
     socketio.emit('receive_message', data, room=data['room'])
 
 
