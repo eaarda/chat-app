@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, join_room, leave_room
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from bson.json_util import dumps
 from pymongo.errors import DuplicateKeyError
+from datetime import datetime
 
 from db import save_user, get_user, save_room, add_room_members, get_room, get_room_members, get_rooms_for_user, \
     is_room_member, is_room_admin, update_room, remove_room_members, save_messages, get_messages
@@ -138,6 +139,7 @@ def edit_room(room_id):
 def handle_send_message_event(data):
     app.logger.info("{} sent message to the room {}: {}".format(
         data['username'], data['room'], data['message']))
+    data['created_at'] = datetime.now().strftime("%d %b, %H:%M")
     save_messages(data['room'], data['message'], data['username'])
     socketio.emit('receive_message', data, room=data['room'])
 
