@@ -13,6 +13,7 @@ chat_db = client.get_database("ChatDB")
 users_collection = chat_db.get_collection("users")
 rooms_collection = chat_db.get_collection("rooms")
 room_members_collection = chat_db.get_collection("room_members")
+messages_collection = chat_db.get_collection("messages")
 
 
 def save_user(username, email, password):
@@ -76,4 +77,9 @@ def update_room(room_id, room_name):
 
 def remove_room_members(room_id, usernames):
     room_members_collection.delete_many(
-        {'_id': {'$in': [{'room_id': room_id, 'username': username}for username in usernames]}})
+        {'_id': {'$in': [{'room_id': room_id, 'username': username} for username in usernames]}})
+
+
+def save_messages(room_id, text, sender):
+    messages_collection.insert_one(
+        {'room_id': room_id, 'text': text, 'sender': sender})

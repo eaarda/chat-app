@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, join_room
+from flask_socketio import SocketIO, join_room, leave_room
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from bson.json_util import dumps
 from pymongo.errors import DuplicateKeyError
 
 from db import save_user, get_user, save_room, add_room_members, get_room, get_room_members, get_rooms_for_user, \
-    is_room_member, is_room_admin, update_room, remove_room_members
+    is_room_member, is_room_admin, update_room, remove_room_members, save_messages
 
 app = Flask(__name__)
 app.secret_key = 'cokgizli'
@@ -147,6 +147,14 @@ def handle_join_room_event(data):
     """ This function puts the user in a room, under the current namespace.
     This is a function that can only be called from a SocketIO event handler. """
     socketio.emit('join_room_announcement', data, room=data['room'])
+
+
+@socketio.on('leave_room')
+def handle_join_room_event(data):
+    app.logger.info("{} left the room {}".format(
+        data['username'], data['room']))
+    leave_room(data['room'])
+    socketio.emit('leave_room_announcement', data, room=data['room'])
 
 
 @login_manager.user_loader
