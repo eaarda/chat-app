@@ -146,7 +146,7 @@ def handle_join_room_event(data):
     join_room(data['room'])
     """ This function puts the user in a room, under the current namespace.
     This is a function that can only be called from a SocketIO event handler. """
-    socketio.emit('join_room_announcement', data)
+    socketio.emit('join_room_announcement', data, room=data['room'])
 
 
 @login_manager.user_loader
