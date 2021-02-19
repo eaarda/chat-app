@@ -1,4 +1,5 @@
-from pymongo import MongoClient
+
+from pymongo import MongoClient, DESCENDING
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from bson import ObjectId
@@ -85,8 +86,13 @@ def save_messages(room_id, text, sender):
         {'room_id': room_id, 'text': text, 'sender': sender, 'created_at': datetime.now()})
 
 
-def get_messages(room_id):
-    messages = list(messages_collection.find({'room_id': room_id}))
+MESSAGE_FETCH_LIMIT = 5
+
+
+def get_messages(room_id, page=0):
+    offset = page * MESSAGE_FETCH_LIMIT
+    messages = list(messages_collection.find(
+        {'room_id': room_id}).sort('_id', DESCENDING).limit(MESSAGE_FETCH_LIMIT).skip(offset))
     for message in messages:
         message['created_at'] = message['created_at'].strftime("%d %b, %H:%M")
-    return messages
+    return messages[::-1]

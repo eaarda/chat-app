@@ -104,6 +104,18 @@ def view_room(room_id):
         return "Room not found!", 404
 
 
+@app.route('/rooms/<room_id>/messages/')
+@login_required
+def get_older_messages(room_id):
+    room = get_room(room_id)
+    if room and is_room_member(room_id, current_user.username):
+        page = int(request.args.get('page', 0))
+        messages = get_messages(room_id, page)
+        return dumps(messages)
+    else:
+        return "Room not found!", 404
+
+
 @app.route('/rooms/<room_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_room(room_id):
